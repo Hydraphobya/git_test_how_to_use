@@ -1,6 +1,6 @@
 --SQL table sice query
 SELECT 
-    t.NAME AS Table56Name,
+    t.NAME AS TableName,
     s.Name AS SchemaName,
     SUM(p.rows) AS [Rows],
     SUM(a.total_pages) * 8 AS TotalSpaceKB, 
@@ -191,53 +191,3 @@ OPTION(USE HINT ('QUERY_PLAN_PROFILE'));
 /*This functionality lets you quickly identify the runtime stats for the last execution of any query in your system, 
 with minimal overhead. The image below shows how to retrieve the plan. If you click on the execution plan XML, 
 which will be the first column of results, will display the execution plan shown in the second image below.*/
-SELECT *
-
-FROM sys.dm_exec_cached_plans AS cp
-
-CROSS APPLY sys.dm_exec_sql_text(plan_handle) AS st
-
-CROSS APPLY sys.dm_exec_query_plan_stats(plan_handle) AS qps; 
-
-GO
---partions
-	SELECT 
-		p.partition_number, p.rows, rv.value
-	FROM 
-		sys.partitions p    
-		INNER JOIN sys.indexes i 
-			ON p.object_id = i.object_id 
-			AND p.index_id = i.index_id    
-		INNER JOIN sys.objects o 
-			ON p.object_id = o.object_id    
-		INNER JOIN sys.partition_schemes ps 
-			ON ps.data_space_id = i.data_space_id    
-		INNER JOIN sys.partition_functions pf 
-			ON pf.function_id = ps.function_id    
-		INNER JOIN sys.partition_range_values rv 
-			ON pf.function_id = rv.function_id 
-			AND p.partition_number = rv.boundary_id    
-	WHERE pf.name = 'PF_fcst_vs_usage'   
--- 
--- index usage
-
-SELECT OBJECT_NAME(IX.OBJECT_ID) Table_Name
-	   ,IX.name AS Index_Name
-	   ,IX.type_desc Index_Type
-	   ,SUM(PS.[used_page_count]) * 8 IndexSizeKB
-	   ,IXUS.user_seeks AS NumOfSeeks
-	   ,IXUS.user_scans AS NumOfScans
-	   ,IXUS.user_lookups AS NumOfLookups
-	   ,IXUS.user_updates AS NumOfUpdates
-	   ,IXUS.last_user_seek AS LastSeek
-	   ,IXUS.last_user_scan AS LastScan
-	   ,IXUS.last_user_lookup AS LastLookup
-	   ,IXUS.last_user_update AS LastUpdate
-FROM sys.indexes IX
-INNER JOIN sys.dm_db_index_usage_stats IXUS ON IXUS.index_id = IX.index_id AND IXUS.OBJECT_ID = IX.OBJECT_ID
-INNER JOIN sys.dm_db_partition_stats PS on PS.object_id=IX.object_id
-WHERE OBJECTPROPERTY(IX.OBJECT_ID,'IsUserTable') = 1
-GROUP BY OBJECT_NAME(IX.OBJECT_ID) ,IX.name ,IX.type_desc ,IXUS.user_seeks ,IXUS.user_scans ,IXUS.user_lookups,IXUS.user_updates ,IXUS.last_user_seek ,IXUS.last_user_scan ,IXUS.last_user_lookup ,IXUS.last_user_update
-
-
-SET-AzContext -SubscriptionId "76e0b748-ad8c-4514-861c-9d51c96bcacd"
