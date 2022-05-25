@@ -1,6 +1,6 @@
 --SQL table sice query
 SELECT 
-    t.NAME AS TableName,
+    t.NAME AS Table56Name,
     s.Name AS SchemaName,
     SUM(p.rows) AS [Rows],
     SUM(a.total_pages) * 8 AS TotalSpaceKB, 
