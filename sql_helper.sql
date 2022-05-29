@@ -161,15 +161,6 @@ ORDER BY tat.transaction_begin_time DESC;
 
 --Statistics
 
-SELECT sp.stats_id, 
-       name, 
-       last_updated, 
-       rows, 
-       rows_sampled
-FROM sys.stats
-     CROSS APPLY sys.dm_db_stats_properties(object_id, stats_id) AS sp
-WHERE user_created = 1
-
 --Rebuilding
 
 USE AdventureWorks2017
